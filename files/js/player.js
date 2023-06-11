@@ -13,7 +13,7 @@ var state = {
     shuffle: false,
 
     previousClick: undefined,
-    playingIndex: undefined,
+    playingIndex: -1,
     storedRegex: "",
 };
 
@@ -45,7 +45,6 @@ if (typeof(Storage) !== "undefined") {
 
 state.nextButton.onclick = playNext;
 
-
 state.toCurrent.onclick = function() {
     if (state.previousClick !== undefined) {
         state.previousClick.scrollIntoView({
@@ -58,7 +57,11 @@ state.toCurrent.onclick = function() {
 
 state.shuffleButton.onclick = function() {
     state.shuffle = !state.shuffle;
-    state.shuffleButton.style.fontWeight = state.shuffle ? "bold" : "normal";
+    if (state.shuffle) {
+        state.shuffleButton.classList.add("selected");
+    } else {
+        state.shuffleButton.classList.remove("selected");
+    }
 };
 
 function playNext() {
@@ -128,14 +131,14 @@ function play_song(side) {
         state.leftOrRightPlaying = side;
 
         if (state.previousClick !== undefined)
-            state.previousClick.style.color = "white";
+            state.previousClick.classList.remove("currently-playing");
 
         state.previousClick = event.target;
         var parent = state.previousClick.parentNode;
         state.playingIndex = Array.prototype.indexOf.call(parent.children, state.previousClick);
 
         state.audio.pause();
-        event.target.style.color = "red";
+        event.target.classList.add("currently-playing");
         state.audioSource.src = decodeHtml("/files/music/" + event.target.innerHTML);
         state.audio.load();
         state.audio.play();
@@ -153,16 +156,15 @@ function processFilterChunk() {
             para.appendChild(node);
             para.addEventListener('click', play_song("Left"));
 
-            if (state.previousClick !== undefined) {
+            if (state.previousClick !== undefined && state.leftOrRightPlaying === "Left") {
                 if (state.previousClick.innerHTML === para.innerHTML) {
-                    para.style.color = "red";
                     state.previousClick = para;
+                    state.previousClick.classList.add("currently-playing");
                     state.playingIndex = included.childElementCount;
                 }
             }
 
             included.appendChild(para);
-
 
             if (processed == 100) {
                 break;

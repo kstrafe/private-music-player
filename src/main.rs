@@ -250,9 +250,9 @@ async fn player(req: HttpRequest, state: web::Data<State>) -> impl Responder {
                         source id="audioSource" src="" {}
                         "Your browser does not support the audio format."
                     }
-                    div class="centrist" { p id="next-button" class="next-button" { "Next" } }
-                    div class="centrist" { p id="shuffle-button" class="shuffle-button" title="Shuffle" { "Shuffle" } }
-                    div class="centrist" { p id="to-current" { "To Current" } }
+                    div id="next-button" class="centrist" { p class="next-button" { "Next" } }
+                    div id="shuffle-button" class="centrist" { p class="shuffle-button" title="Shuffle" { "Shuffle" } }
+                    div id="to-current" class="centrist" { p { "To Current" } }
                 }
                 div class="side-by-side" {
                     div id="included" class="included" {}
