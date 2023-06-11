@@ -1,10 +1,10 @@
 @charset "utf-8";
-:root { --color-gray: #AAAAAA; --color-green: #47D557; --color-navy: #001F3F; --color-orange: #FF851B; }
+:root { --color-silver: #DDDDDD; --color-gray: #AAAAAA; --color-green: #47D557; --color-navy: #001F3F; --color-orange: #FF851B; }
 
 html { color-scheme: dark; }
-
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { display: flex; flex-direction: column; height: 100vh; position: absolute; width: 100vw; }
+
 .login-form { display: flex; flex-direction: column; flex-grow: 1; width: 100%; }
 .login-form > .button { flex-grow: 1; font-size: 4rem; width: 100%; }
 .login-form > .input { flex-grow: 1; color: var(--color-green); font-size: 4rem; text-align: center; width: 100%; }
@@ -13,23 +13,27 @@ p { display: inline-block; font-family: "Arial"; padding: 1%; overflow-y: hidden
 p:hover { background-color: var(--color-navy); }
 .centrist:hover { background-color: var(--color-navy); }
 
-body > .input { display: block; flex: 1 1 10%; font-size: 3rem; }
+body > .input { z-index: 1; display: block; flex: 1 1 10%; font-size: 3rem; }
 .control-row { align-items: center; border-bottom: 1px solid var(--color-orange); display: flex; flex-wrap: wrap; justify-content: center; overflow: hidden; }
 .control-row > .player { flex: 2 1 auto; }
-.control-row > p { flex: 1 1 auto; text-align: center; }
+.control-row p { flex: 1 1 auto; text-align: center; user-select: none; }
 .side-by-side { display: flex; flex: 1 1 90%; overflow: hidden; }
 .included { border-right: 1px solid var(--color-orange); flex: 1 1 50%; padding: 1%; overflow: scroll; }
+.included > p { float: left; clear: left; }
+.excluded > p { float: left; clear: left; }
+.included p:nth-child(even) { color: var(--color-silver); }
+.included p:nth-child(odd) { color: var(--color-gray); }
 .excluded { flex: 1 1 50%; padding: 1%; overflow: scroll; }
-.centrist { height: 100%; flex: 1 1 auto; align-items: center; display: flex; justify-content: center; }
+.centrist { align-items: center; display: flex; flex: 1 1 auto; height: 100%; justify-content: center; }
 .centrist > * { flex: 1 1 auto; }
 
 @media (max-width:480px) {
     body > .input { display: block; flex: 1 1 10%; font-size: 2rem; }
     .control-row { align-items: flex-start; border-bottom: 1px solid var(--color-orange); display: flex; flex: 1 1 20%; flex-wrap: wrap; justify-content: center; overflow: hidden; }
     .control-row > .player { flex: 0 0 100%; }
-    .centrist { height: 100%; }
-    .control-row > div { height: 100%; }
-    .control-row p { text-align: center; transform: translate(0, -100%); }
+    .centrist { align-items: center; height: 100%; justify-content: center; }
+    .control-row > div { border: 1px solid gray; height: 100%;}
+    .control-row p { font-size: 1.5rem; height: 50%; }
     .side-by-side { display: flex; flex: 1 1 70%; flex-direction: column; overflow: hidden; }
     .included { border-bottom: 1px solid var(--color-orange); border-right: 0; }
 }
