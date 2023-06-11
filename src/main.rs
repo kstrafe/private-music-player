@@ -4,18 +4,21 @@ use {
     actix_files::NamedFile,
     actix_service::Service,
     actix_web::{
-        cookie::{Cookie, CookieJar, Key},
+        cookie::Cookie,
+        error, get,
         http::header::HeaderValue,
+        http::{header::ContentType, StatusCode},
         web,
         web::Data,
         App, HttpRequest, HttpResponse, HttpServer, Responder,
     },
     chrono::{prelude::*, DateTime},
+    derive_more::{Display, Error},
     indexmap::IndexMap,
     maud::{html, Markup, PreEscaped, DOCTYPE},
     rand::Rng,
     rand_pcg::Pcg64Mcg as Random,
-    serde_derive::{Serialize, Deserialize},
+    serde_derive::{Deserialize, Serialize},
     sha2::{Digest, Sha512},
     std::{
         cell::RefCell,
@@ -31,6 +34,7 @@ use {
         thread,
         time::{Duration, Instant, SystemTime},
     },
+    uuid::Uuid,
 };
 
 mod indexer;
@@ -129,21 +133,74 @@ fn is_password_correct(form_password: &str) -> bool {
     false
 }
 
+fn is_logged_in(req: &HttpRequest, state: &State) -> bool {
+    if let Some(cookie) = req.cookie("session") {
+        return state.sessions.read().unwrap().contains_key(cookie.value());
+    }
+    false
+}
+
 async fn login_post(form: web::Form<LoginForm>, state: web::Data<State>) -> impl Responder {
     if is_password_correct(&form.key) {
-        let mut jar = CookieJar::new();
-        jar.private_mut(&state.key)
-            .add(Cookie::new("key", form.key.clone()));
-
+        let session_id = Uuid::new_v4().to_string();
+        state
+            .sessions
+            .write()
+            .unwrap()
+            .insert(session_id.clone(), chrono::offset::Utc::now());
         return HttpResponse::SeeOther()
             .insert_header(("Location", "/"))
-            .cookie(jar.get("key").unwrap().clone())
+            .cookie(
+                Cookie::build("session", session_id)
+                    .secure(true)
+                    .permanent()
+                    .finish(),
+            )
             .finish();
     }
 
     HttpResponse::SeeOther()
         .insert_header(("Location", "/login?message=Wrong password"))
         .finish()
+}
+
+#[derive(Debug, Display, Error)]
+enum MyError {
+    #[display(fmt = "unauthorized")]
+    Unauthorized,
+}
+
+impl error::ResponseError for MyError {
+    fn error_response(&self) -> HttpResponse {
+        HttpResponse::build(self.status_code())
+            .insert_header(ContentType::html())
+            .body(self.to_string())
+    }
+
+    fn status_code(&self) -> StatusCode {
+        StatusCode::UNAUTHORIZED
+    }
+}
+
+async fn get_file_restricted(
+    req: HttpRequest,
+    state: web::Data<State>,
+) -> actix_web::Result<NamedFile> {
+    if !is_logged_in(&req, &state) {
+        return Err(MyError::Unauthorized.into());
+    }
+
+    let mut path = PathBuf::from("files/music/");
+    let rest = req
+        .match_info()
+        .query("filename")
+        .parse::<PathBuf>()
+        .unwrap();
+    path.push(&rest);
+    match NamedFile::open(path) {
+        Ok(file) => Ok(file),
+        Err(err) => Err(err.into()),
+    }
 }
 
 async fn get_file(req: HttpRequest) -> actix_web::Result<NamedFile> {
@@ -172,13 +229,19 @@ async fn robots() -> impl Responder {
         .finish()
 }
 
-async fn player(request: HttpRequest) -> impl Responder {
+async fn player(req: HttpRequest, state: web::Data<State>) -> impl Responder {
+    if !is_logged_in(&req, &state) {
+        return HttpResponse::SeeOther()
+            .insert_header(("Location", "/login"))
+            .finish();
+    }
+
     let html = html! {
         (DOCTYPE)
         html {
             head {
                 (header())
-                title { "PMP" }
+                title { "Personal Music Player" }
             }
             body {
                 input id="filter" class="input" type="text" placeholder="Regex filter (smart case)" {}
@@ -187,9 +250,9 @@ async fn player(request: HttpRequest) -> impl Responder {
                         source id="audioSource" src="" {}
                         "Your browser does not support the audio format."
                     }
-                    p id="next-button" class="next-button" { "Next" }
-                    p id="shuffle-button" class="shuffle-button" title="Shuffle" { "Shuffle" }
-                    p id="to-current" { "To Current" }
+                    div class="centrist" { p id="next-button" class="next-button" { "Next" } }
+                    div class="centrist" { p id="shuffle-button" class="shuffle-button" title="Shuffle" { "Shuffle" } }
+                    div class="centrist" { p id="to-current" { "To Current" } }
                 }
                 div class="side-by-side" {
                     div id="included" class="included" {}
@@ -226,8 +289,11 @@ async fn main() -> std::io::Result<()> {
             .route("/list", web::get().to(list))
             .route("/robots.txt", web::get().to(robots))
             .route("favicon.ico", web::get().to(redirect_favicon))
+            .route(
+                "/files/music/{filename:.*}",
+                web::get().to(get_file_restricted),
+            )
             .route("/files/{filename:.*}", web::get().to(get_file))
-        // .default_service(web::get().to(unknown_route))
     })
     .bind(format!("127.0.0.1:{}", PORT))?
     .run()

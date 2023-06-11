@@ -1,6 +1,13 @@
 use {
-    actix_web::cookie::Key,
-    std::{fs, path::{Path, PathBuf}, sync::{Arc, RwLock}, thread, time::Duration},
+    chrono::{prelude::*, DateTime},
+    std::{
+        collections::HashMap,
+        fs,
+        path::{Path, PathBuf},
+        sync::{Arc, RwLock},
+        thread,
+        time::Duration,
+    },
 };
 
 pub fn create_state_updater_with_thread() -> State {
@@ -52,10 +59,7 @@ fn has_music_extension<P: AsRef<Path>>(path: P) -> bool {
     if let Some(ext) = path.as_ref().extension() {
         if let Some(ext) = ext.to_str() {
             match ext {
-                "mp3"
-                | "flac"
-                | "ogg"
-                => return true,
+                "mp3" | "flac" | "ogg" => return true,
                 _ => return false,
             }
         }
@@ -65,15 +69,15 @@ fn has_music_extension<P: AsRef<Path>>(path: P) -> bool {
 
 #[derive(Clone)]
 pub struct State {
-    pub key: Arc<Key>,
     pub music: Arc<RwLock<Vec<PathBuf>>>,
+    pub sessions: Arc<RwLock<HashMap<String, DateTime<Utc>>>>,
 }
 
 impl State {
     fn new() -> Self {
         Self {
-            key: Arc::new(Key::generate()),
             music: Arc::new(RwLock::new(Vec::new())),
+            sessions: Arc::new(RwLock::new(HashMap::new())),
         }
     }
 }

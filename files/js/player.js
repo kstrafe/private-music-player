@@ -14,7 +14,21 @@ var state = {
 
     previousClick: undefined,
     playingIndex: undefined,
+    storedRegex: "",
 };
+
+function store_regex() {
+    if (typeof(Storage) !== "undefined") {
+        localStorage.setItem("regex", state.storedRegex);
+    }
+}
+
+if (typeof(Storage) !== "undefined") {
+    var storedRegex = localStorage.getItem("regex");
+    if (storedRegex !== null) {
+        state.storedRegex = storedRegex;
+    }
+}
 
 function store_shuffle() {
     if (typeof(Storage) !== "undefined") {
@@ -34,7 +48,11 @@ state.nextButton.onclick = playNext;
 
 state.toCurrent.onclick = function() {
     if (state.previousClick !== undefined) {
-        state.previousClick.scrollIntoView();
+        state.previousClick.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+            inline: "nearest",
+        });
     }
 };
 
@@ -64,7 +82,11 @@ function playNext() {
         }
 
         item.click()
-        item.scrollIntoView();
+        item.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+            inline: "nearest",
+        });
     }
 
     if (state.leftOrRightPlaying == "Left") {
@@ -155,23 +177,29 @@ function processFilterChunk() {
 }
 
 function input(event) {
+    handleInput(event.target)
+}
+function handleInput(target) {
     state.chunkIndex = 0;
-    console.log("INPUT");
 
     if (state.chunkHandler !== undefined) {
         clearTimeout(state.chunkHandler);
         state.chunkHandler = undefined;
     }
 
-    const searchTerm = event.target.value;
+    const searchTerm = target.value;
     const caseSensitive = state.upperCaseRegex.test(searchTerm) ? '' : 'i';
-    state.regex = new RegExp(event.target.value, caseSensitive);
+    state.regex = new RegExp(target.value, caseSensitive);
+    state.storedRegex = target.value;
+    store_regex();
     document.getElementById('included').innerHTML = '';
 
     processFilterChunk();
 }
 
-document.getElementById('filter').addEventListener('input', input);
+var filter = document.getElementById('filter');
+filter.value = state.storedRegex;
+filter.addEventListener('input', input);
 
 function getList(callback)
 {
@@ -198,6 +226,7 @@ function updateList(newList) {
     }
 
     document.getElementById('excluded').replaceChildren(...newNodes);
+    handleInput(filter);
 }
 
 setInterval(getList, 3600_000, updateList);

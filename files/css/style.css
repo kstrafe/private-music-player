@@ -9,20 +9,29 @@ body { display: flex; flex-direction: column; height: 100vh; position: absolute;
 .login-form > .button { flex-grow: 1; font-size: 4rem; width: 100%; }
 .login-form > .input { flex-grow: 1; color: var(--color-green); font-size: 4rem; text-align: center; width: 100%; }
 
-p { font-family: "Arial"; padding: 1%; overflow-x: scroll; overflow-y: hidden; white-space: nowrap; }
+p { display: inline-block; font-family: "Arial"; padding: 1%; overflow-y: hidden; white-space: nowrap; }
+p:hover { background-color: var(--color-navy); }
+.centrist:hover { background-color: var(--color-navy); }
 
 body > .input { display: block; flex: 1 1 10%; font-size: 3rem; }
-.control-row { align-items: center; display: flex; justify-content: center; overflow: hidden; }
-.control-row > * { flex: 0 1 auto; }
-.control-row > .player { flex: 1 1 auto; }
+.control-row { align-items: center; border-bottom: 1px solid var(--color-orange); display: flex; flex-wrap: wrap; justify-content: center; overflow: hidden; }
+.control-row > .player { flex: 2 1 auto; }
+.control-row > p { flex: 1 1 auto; text-align: center; }
 .side-by-side { display: flex; flex: 1 1 90%; overflow: hidden; }
 .included { border-right: 1px solid var(--color-orange); flex: 1 1 50%; padding: 1%; overflow: scroll; }
 .excluded { flex: 1 1 50%; padding: 1%; overflow: scroll; }
+.centrist { height: 100%; flex: 1 1 auto; align-items: center; display: flex; justify-content: center; }
+.centrist > * { flex: 1 1 auto; }
 
-p:hover { background-color: var(--color-navy); }
-
-.shuffle-button {
-    text-align: center;
+@media (max-width:480px) {
+    body > .input { display: block; flex: 1 1 10%; font-size: 2rem; }
+    .control-row { align-items: flex-start; border-bottom: 1px solid var(--color-orange); display: flex; flex: 1 1 20%; flex-wrap: wrap; justify-content: center; overflow: hidden; }
+    .control-row > .player { flex: 0 0 100%; }
+    .centrist { height: 100%; }
+    .control-row > div { height: 100%; }
+    .control-row p { text-align: center; transform: translate(0, -100%); }
+    .side-by-side { display: flex; flex: 1 1 70%; flex-direction: column; overflow: hidden; }
+    .included { border-bottom: 1px solid var(--color-orange); border-right: 0; }
 }
 
 .shuffle-button::before {
@@ -34,3 +43,4 @@ p:hover { background-color: var(--color-navy); }
   overflow: hidden;
   visibility: hidden;
 }
+
