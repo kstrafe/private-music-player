@@ -24,6 +24,7 @@ p:hover { background-color: var(--color-navy); }
 .shuffle-button {
     text-align: center;
 }
+
 .shuffle-button::before {
   display: block;
   content: attr(title);

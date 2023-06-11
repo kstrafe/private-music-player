@@ -187,6 +187,7 @@ async fn player(request: HttpRequest) -> impl Responder {
                         source id="audioSource" src="" {}
                         "Your browser does not support the audio format."
                     }
+                    p id="next-button" class="next-button" { "Next" }
                     p id="shuffle-button" class="shuffle-button" title="Shuffle" { "Shuffle" }
                     p id="to-current" { "To Current" }
                 }

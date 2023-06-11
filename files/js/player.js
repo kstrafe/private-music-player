@@ -1,119 +1,171 @@
-var list = [];
-var chunkIndex = 0;
-var chunkHandler = undefined;
-var regex = new RegExp("");
-const upperCaseRegex = /.*\p{Lu}.*$/u;
-var audio = document.getElementById('player');
-var audioSource = document.getElementById('audioSource');
-var previousClick = undefined;
-var leftOrRightPlaying = "Right";
-var toCurrent = document.getElementById('to-current');
-var shuffleButton = document.getElementById('shuffle-button');
-var shuffle = false;
+var state = {
+    list: [],
+    chunkIndex: 0,
+    chunkHandler: undefined,
+    regex: new RegExp(""),
+    upperCaseRegex: /.*\p{Lu}.*$/u,
+    audio: document.getElementById('player'),
+    audioSource: document.getElementById('audioSource'),
+    leftOrRightPlaying: "Right",
+    toCurrent: document.getElementById('to-current'),
+    shuffleButton: document.getElementById('shuffle-button'),
+    nextButton: document.getElementById('next-button'),
+    shuffle: false,
+
+    previousClick: undefined,
+    playingIndex: undefined,
+};
 
 function store_shuffle() {
     if (typeof(Storage) !== "undefined") {
-        localStorage.setItem("shuffle", shuffle);
+        localStorage.setItem("shuffle", state.shuffle);
     }
 }
 
 if (typeof(Storage) !== "undefined") {
     var storedShuffle = localStorage.getItem("shuffle");
     if (storedShuffle !== null) {
-        shuffle = storedShuffle;
+        state.shuffle = storedShuffle;
     }
 }
 
-toCurrent.onclick = function() {
-    if (previousClick !== undefined) {
-        previousClick.scrollIntoView();
+state.nextButton.onclick = playNext;
+
+
+state.toCurrent.onclick = function() {
+    if (state.previousClick !== undefined) {
+        state.previousClick.scrollIntoView();
     }
 };
 
-shuffleButton.onclick = function() {
-    shuffle = !shuffle;
-    console.log("Setting fontweight", (shuffle ? "900" : "0"));
-    shuffleButton.style.fontWeight = shuffle ? "bold" : "normal";
+state.shuffleButton.onclick = function() {
+    state.shuffle = !state.shuffle;
+    state.shuffleButton.style.fontWeight = state.shuffle ? "bold" : "normal";
 };
 
-audio.onended = function() {
-    if (leftOrRightPlaying == "Left") {
-        var included = document.getElementById('included');
-        var le = included.children[Math.floor(1 + Math.random() * included.childElementCount)];
-        le.click()
-        le.scrollIntoView();
+function playNext() {
+    function internalPlayNext(fromList) {
+        const children = fromList.children;
+        const count = fromList.childElementCount;
+        if (count === 0) {
+            return;
+        }
+
+        var item;
+
+        if (state.shuffle) {
+            item = children[Math.floor(1 + Math.random() * count)];
+        } else {
+            state.playingIndex += 1;
+            if (state.playingIndex >= count) {
+                state.playingIndex = 0;
+            }
+            item = children[state.playingIndex];
+        }
+
+        item.click()
+        item.scrollIntoView();
+    }
+
+    if (state.leftOrRightPlaying == "Left") {
+        const included = document.getElementById('included');
+        internalPlayNext(included);
+    } else if (state.leftOrRightPlaying = "Right") {
+        const excluded = document.getElementById('excluded');
+        internalPlayNext(excluded)
     } else {
+        console.error("leftOrRightPlaying is neither Left nor Right:", leftOrRightPlaying);
     }
 }
 
-audio.onvolumechange = store_volume;
+state.audio.onended = playNext;
+
+state.audio.onvolumechange = store_volume;
 
 function store_volume() {
     if (typeof(Storage) !== "undefined") {
-        localStorage.setItem("volume", audio.volume);
+        localStorage.setItem("volume", state.audio.volume);
     }
 }
 
 if (typeof(Storage) !== "undefined") {
     var last_volume = localStorage.getItem("volume");
     if (last_volume !== null && last_volume != 0) {
-        audio.volume = last_volume;
+        state.audio.volume = last_volume;
     }
 }
 
 function play_song(side) {
     return function(event) {
-        leftOrRightPlaying = side;
+        function decodeHtml(html) {
+            var txt = document.createElement("textarea");
+            txt.innerHTML = html;
+            return txt.value;
+        }
 
-        if (previousClick !== undefined)
-            previousClick.style.color = "white";
-        previousClick = event.target;
+        state.leftOrRightPlaying = side;
 
-        audio.pause();
+        if (state.previousClick !== undefined)
+            state.previousClick.style.color = "white";
+
+        state.previousClick = event.target;
+        var parent = state.previousClick.parentNode;
+        state.playingIndex = Array.prototype.indexOf.call(parent.children, state.previousClick);
+
+        state.audio.pause();
         event.target.style.color = "red";
-        audioSource.src = "/files/music/" + event.target.innerHTML;
-        audio.load();
-        audio.play();
+        state.audioSource.src = decodeHtml("/files/music/" + event.target.innerHTML);
+        state.audio.load();
+        state.audio.play();
     };
 }
 
 function processFilterChunk() {
     var included = document.getElementById('included');
     var processed = 0;
-    for (var idx = chunkIndex; idx < list.length; ++idx) {
-        if (regex.test(list[idx])) {
+    for (var idx = state.chunkIndex; idx < state.list.length; ++idx) {
+        if (state.regex.test(state.list[idx])) {
             processed += 1;
             const para = document.createElement("p");
-            const node = document.createTextNode(list[idx]);
+            const node = document.createTextNode(state.list[idx]);
             para.appendChild(node);
             para.addEventListener('click', play_song("Left"));
+
+            if (state.previousClick !== undefined) {
+                if (state.previousClick.innerHTML === para.innerHTML) {
+                    para.style.color = "red";
+                    state.previousClick = para;
+                    state.playingIndex = included.childElementCount;
+                }
+            }
+
             included.appendChild(para);
+
 
             if (processed == 100) {
                 break;
             }
         }
-        chunkIndex = idx + 1;
+        state.chunkIndex = idx + 1;
     }
 
-    if (processed != 0 && chunkIndex < list.length) {
-        chunkHandler = setTimeout(processFilterChunk, 50);
+    if (processed != 0 && state.chunkIndex < state.list.length) {
+        state.chunkHandler = setTimeout(processFilterChunk, 50);
     }
 }
 
 function input(event) {
-    chunkIndex = 0;
+    state.chunkIndex = 0;
     console.log("INPUT");
 
-    if (chunkHandler !== undefined) {
-        clearTimeout(chunkHandler);
-        chunkHandler = undefined;
+    if (state.chunkHandler !== undefined) {
+        clearTimeout(state.chunkHandler);
+        state.chunkHandler = undefined;
     }
 
     const searchTerm = event.target.value;
-    const caseSensitive = upperCaseRegex.test(searchTerm) ? '' : 'i';
-    console.log('case:', caseSensitive);
-    regex = new RegExp(event.target.value, caseSensitive);
+    const caseSensitive = state.upperCaseRegex.test(searchTerm) ? '' : 'i';
+    state.regex = new RegExp(event.target.value, caseSensitive);
     document.getElementById('included').innerHTML = '';
 
     processFilterChunk();
@@ -134,12 +186,12 @@ function getList(callback)
 }
 
 function updateList(newList) {
-    list = newList;
+    state.list = newList;
     var newNodes = [];
 
-    for (idx in list) {
+    for (idx in state.list) {
         const para = document.createElement("p");
-        const node = document.createTextNode(list[idx]);
+        const node = document.createTextNode(state.list[idx]);
         para.appendChild(node);
         para.addEventListener('click', play_song("Right"));
         newNodes.push(para);
