@@ -5,34 +5,22 @@ use {
     actix_service::Service,
     actix_web::{
         cookie::Cookie,
-        error, get,
-        http::header::HeaderValue,
+        error,
         http::{header::ContentType, StatusCode},
         web,
         web::Data,
         App, HttpRequest, HttpResponse, HttpServer, Responder,
     },
-    chrono::{prelude::*, DateTime},
+    chrono::prelude::*,
     derive_more::{Display, Error},
-    indexmap::IndexMap,
-    maud::{html, Markup, PreEscaped, DOCTYPE},
-    rand::Rng,
-    rand_pcg::Pcg64Mcg as Random,
+    maud::{html, Markup, DOCTYPE},
     serde_derive::{Deserialize, Serialize},
     sha2::{Digest, Sha512},
     std::{
-        cell::RefCell,
-        cmp,
-        fs::{read_dir, File},
-        io::{self, Read, Write},
+        fs::File,
+        io::{self, Read},
         num::ParseIntError,
         path::PathBuf,
-        sync::{
-            atomic::{AtomicU64, Ordering},
-            Arc, RwLock,
-        },
-        thread,
-        time::{Duration, Instant, SystemTime},
     },
     uuid::Uuid,
 };
@@ -76,7 +64,7 @@ fn header() -> Markup {
 struct LoginQuery {
     message: Option<String>,
 }
-async fn login(request: HttpRequest, query: web::Query<LoginQuery>) -> impl Responder {
+async fn login(query: web::Query<LoginQuery>) -> impl Responder {
     let placeholder = query
         .message
         .clone()
@@ -127,7 +115,7 @@ fn is_password_correct(form_password: &str) -> bool {
             let mut hasher = Sha512::new();
             hasher.update(form_password.as_bytes());
             let result = hasher.finalize();
-            return &result[..] == password;
+            return result[..] == password;
         }
     }
     false
@@ -147,7 +135,7 @@ async fn login_post(form: web::Form<LoginForm>, state: web::Data<State>) -> impl
             .sessions
             .write()
             .unwrap()
-            .insert(session_id.clone(), chrono::offset::Utc::now());
+            .insert(session_id.clone(), Utc::now());
         return HttpResponse::SeeOther()
             .insert_header(("Location", "/"))
             .cookie(

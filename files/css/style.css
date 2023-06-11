@@ -1,5 +1,5 @@
 @charset "utf-8";
-:root { --color-silver: #DDDDDD; --color-red: #FF4136; --color-gray: #AAAAAA; --color-green: #47D557; --color-navy: #001F3F; --color-orange: #FF851B; }
+:root { --color-gray: #AAAAAA; --color-green: #47D557; --color-navy: #001F3F; --color-orange: #FF851B; --color-red: #FF4136; --color-silver: #DDDDDD; }
 
 html { color-scheme: dark; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
