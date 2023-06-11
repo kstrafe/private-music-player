@@ -185,7 +185,7 @@ async fn get_file_restricted(
         .parse::<PathBuf>()
         .unwrap();
     path.push(&rest);
-    match NamedFile::open(path) {
+    match NamedFile::open_async(path).await {
         Ok(file) => Ok(file),
         Err(err) => Err(err.into()),
     }
@@ -199,7 +199,7 @@ async fn get_file(req: HttpRequest) -> actix_web::Result<NamedFile> {
         .parse::<PathBuf>()
         .unwrap();
     path.push(&rest);
-    match NamedFile::open(path) {
+    match NamedFile::open_async(path).await {
         Ok(file) => Ok(file),
         Err(err) => Err(err.into()),
     }
