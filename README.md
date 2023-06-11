@@ -14,9 +14,9 @@ Now you can now run your very own private music streaming server!
 
 The site indexes the music directory every 10 minutes, and the website on the client side requests the index from the server every 10 minutes.
 
-Use `echo -n '<your password here>' sha512sum | cut -d ' ' -f 1 > password` in bash to create a new password file.
+Use the `new-password` script to create a new password file.
 
-See [this blogpost](https://kevin.stravers.net/PrivateMusicPlayer)
+See [this blogpost](https://kevin.stravers.net/PrivateMusicPlayer) related to this repository.
 
 # How it looks #
 
