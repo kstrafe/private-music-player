@@ -26,8 +26,8 @@ Sometimes media partially fails to load on firefox 110.0.0 and 114.0.1 (others n
 
 # How it looks #
 
-## Desktop: ##
-![Desktop screenshot](https://kevin.stravers.net/x/PrivateMusicPlayer-desktop.png)
-
 ## Phone: ##
-![Phone screenshot](https://kevin.stravers.net/x/PrivateMusicPlayer-phone.png)
+<img src="https://kevin.stravers.net/x/PrivateMusicPlayer-phone.png" height="600">
+
+## Desktop: ##
+<img src="https://kevin.stravers.net/x/PrivateMusicPlayer-desktop.png" height="600">
