@@ -20,6 +20,10 @@ Use the `new-password` script to create a new password file.
 
 See [this blogpost](https://kevin.stravers.net/PrivateMusicPlayer) related to this repository.
 
+# Issues #
+
+Sometimes causes media to fail loading on firefox, thus skipping the song from the middle. Not observed on brave of chromium.
+
 # How it looks #
 
 Desktop:
