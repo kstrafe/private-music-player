@@ -231,6 +231,6 @@ function updateList(newList) {
     handleInput(filter);
 }
 
-setInterval(getList, 600_000, updateList);
+setInterval(getList, 300_000, updateList);
 
 getList(updateList);
