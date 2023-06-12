@@ -17,6 +17,18 @@ var state = {
     storedRegex: "",
 };
 
+function togglePause() {
+    if (state.audio.paused) {
+        state.audio.play();
+    } else {
+        state.audio.pause();
+    }
+}
+
+function seekZero() {
+    state.audio.currentTime = 0;
+}
+
 function store_regex() {
     if (typeof(Storage) !== "undefined") {
         localStorage.setItem("regex", state.storedRegex);
@@ -295,3 +307,11 @@ function updateList(newList) {
 setInterval(getList, 300_000, updateList);
 
 getList(updateList);
+
+if ("mediaSession" in navigator) {
+    state.audio.session = navigator.mediaSession;
+    navigator.mediaSession.setActionHandler('nexttrack', playNext);
+    navigator.mediaSession.setActionHandler('seekforward', playNext);
+    navigator.mediaSession.setActionHandler('previoustrack', seekZero);
+    navigator.mediaSession.setActionHandler('pause', togglePause);
+}
