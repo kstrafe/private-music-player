@@ -22,7 +22,7 @@ See [this blogpost](https://kevin.stravers.net/PrivateMusicPlayer) related to th
 
 # Issues #
 
-Sometimes media partially fails to load on firefox 110.0.0 and 114.0.1 (others not tested), thus skipping the song from the middle. Not observed on brave of chromium.
+Sometimes media partially fails to load on firefox 110.0.0 and 114.0.1 (others not tested), thus skipping the song from the middle. Not observed on brave or chromium.
 
 # How it looks #
 
