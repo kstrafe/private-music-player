@@ -14,7 +14,9 @@ No major dependencies. No database. Just linux (it might work on others platform
 
 # Useful Info #
 
-The server indexes the music directory every 10 minutes. The client requests the index from the server every 5 minutes as per the [Nyquist frequency](https://en.wikipedia.org/wiki/Nyquist_frequency).
+The server indexes the music directory every 10 minutes. That index consists of the paths. These are stored it in a list in memory such that the client request is merely a memory dump and not a disk-access operation.
+
+The client requests the index from the server every 5 minutes as per the [Nyquist frequency](https://en.wikipedia.org/wiki/Nyquist_frequency).
 
 Use the `new-password` script to create a new password file.
 
