@@ -22,4 +22,8 @@ See [this blogpost](https://kevin.stravers.net/PrivateMusicPlayer) related to th
 
 # How it looks #
 
+Desktop:
 ![Desktop screenshot](https://kevin.stravers.net/x/PrivateMusicPlayer-desktop.png)
+
+Phone:
+![Phone screenshot](https://kevin.stravers.net/x/PrivateMusicPlayer-phone.png)
