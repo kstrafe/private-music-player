@@ -47,11 +47,20 @@ state.nextButton.onclick = playNext;
 
 state.toCurrent.onclick = function() {
     if (state.previousClick !== undefined) {
-        state.previousClick.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-            inline: "nearest",
-        });
+        // state.previousClick.scrollIntoView({
+        //     behavior: "smooth",
+        //     block: "center",
+        //     inline: "nearest",
+        // });
+
+        let target = state.previousClick;
+        let parent = target.parentNode;
+        let value = target.offsetTop - (parent.offsetTop + parent.offsetHeight / 2);
+        parent.scrollTo({top: value, behavior: 'smooth'})
+
+        // fallback
+        // let target = state.previousClick;
+        // target.parentNode.scrollTop = target.offsetTop - (target.parentNode.offsetTop + target.parentNode.offsetHeight / 2);
     }
 };
 
@@ -84,7 +93,7 @@ function playNext() {
             item = children[state.playingIndex];
         }
 
-        item.click()
+        item.click();
         item.scrollIntoView({
             behavior: "smooth",
             block: "center",
