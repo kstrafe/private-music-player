@@ -1,6 +1,6 @@
 #!(feature(proc_macro_hygiene)]
 use {
-    self::indexer::{create_state_updater_with_thread, State},
+    self::updater::{create_state_updater_with_thread, State},
     actix_files::NamedFile,
     actix_service::Service,
     actix_web::{
@@ -25,7 +25,7 @@ use {
     uuid::Uuid,
 };
 
-mod indexer;
+mod updater;
 
 static PORT: u16 = 8081;
 static DESCRIPTION: &str = "Private music player";
