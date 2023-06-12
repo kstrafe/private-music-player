@@ -248,7 +248,7 @@ function handleInput(target) {
     store_regex();
     document.getElementById('included').innerHTML = '';
 
-    processFilterChunk();
+    setTimeout(processFilterChunk(), 0);
 }
 
 var filter = document.getElementById('filter');
