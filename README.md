@@ -3,6 +3,8 @@
 Are music streaming services letting you down?
 Now you can now run your very own private music streaming server!
 
+No major dependencies. No database. Just linux (it might work on others platforms but haven't tested).
+
 # Getting Started #
 
 1. Clone this repository: `git clone github.com/kstrafe/private-music-player`
@@ -12,7 +14,7 @@ Now you can now run your very own private music streaming server!
 
 # Useful Info #
 
-The site indexes the music directory every 10 minutes, and the website on the client side requests the index from the server every 10 minutes.
+The server indexes the music directory every 10 minutes. The client requests the index from the server every 10 minutes.
 
 Use the `new-password` script to create a new password file.
 
