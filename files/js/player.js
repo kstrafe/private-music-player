@@ -103,11 +103,63 @@ function playNext() {
     }
 }
 
-state.audio.onended = playNext;
+state.audio.onended = function(event) {
+    // console.log("onended", event);
+    playNext();
+}
+state.audio.onvolumechange = storeVolume;
 
-state.audio.onvolumechange = store_volume;
+// function reportAction(name) {
+//     return function reportAction(event) {
+//         if (name == "error") {
+//             switch (event.target.error.code) {
+//                 case event.target.error.MEDIA_ERR_ABORTED:
+//                   console.log('You aborted the video playback.');
+//                   break;
+//                 case event.target.error.MEDIA_ERR_NETWORK:
+//                   console.log('A network error caused the audio download to fail.');
+//                   break;
+//                 case event.target.error.MEDIA_ERR_DECODE:
+//                   console.log('The audio playback was aborted due to a corruption problem or because the video used features your browser did not support.');
+//                   break;
+//                 case event.target.error.MEDIA_ERR_SRC_NOT_SUPPORTED:
+//                   console.log('The video audio not be loaded, either because the server or network failed or because the format is not supported.');
+//                   break;
+//                 default:
+//                   console.log('An unknown error occurred.');
+//                   break;
+//             }
+//             console.log(name, 'message:', event.target.error.message, 'code:', event.target.error.code);
+//         }
+//         console.log(name, event);
+//     };
+// }
 
-function store_volume() {
+// state.audio.onabort = reportAction("abort");
+// state.audio.oncanplay = reportAction("canplay");
+// state.audio.oncanplaythrough = reportAction("canplaythrough");
+// state.audio.ondurationchange = reportAction("durationchange");
+// state.audio.onemptied = reportAction("emptied");
+// state.audio.onencrypted = reportAction("encrypted");
+// // state.audio.onended = reportAction("ended");
+// state.audio.onerror = reportAction("error");
+// state.audio.onloadeddata = reportAction("loadeddata");
+// state.audio.onloadedmetadata = reportAction("loadedmetadata");
+// state.audio.onloadstart = reportAction("loadstart");
+// state.audio.onpause = reportAction("pause");
+// state.audio.onplay = reportAction("play");
+// state.audio.onplaying = reportAction("playing");
+// // state.audio.onprogress = reportAction("progress");
+// state.audio.onratechange = reportAction("ratechange");
+// state.audio.onseeked = reportAction("seeked");
+// state.audio.onseeking = reportAction("seeking");
+// state.audio.onstalled = reportAction("stalled");
+// state.audio.onsuspend = reportAction("suspend");
+// // state.audio.ontimeupdate = reportAction("timeupdate");
+// // state.audio.onvolumechange = reportAction("volumechange");
+// state.audio.onwaiting = reportAction("waiting");
+
+function storeVolume() {
     if (typeof(Storage) !== "undefined") {
         localStorage.setItem("volume", state.audio.volume);
     }
