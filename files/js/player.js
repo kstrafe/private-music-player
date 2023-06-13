@@ -314,12 +314,6 @@ function onSongClicked(side) {
         if (state.currentlyPlaying !== undefined)
             state.currentlyPlaying.classList.remove("currently-playing");
 
-        var prevImage = null;
-        if (state.audio.childElementCount === 1) {
-            prevImage = state.audio.children[0].getAttribute('src');
-            prevImage = prevImage.substr(0, prevImage.lastIndexOf('/'));
-        }
-
         state.currentlyPlaying = event.target;
         var parent = state.currentlyPlaying.parentNode;
         state.playingIndex = Array.prototype.indexOf.call(parent.children, state.currentlyPlaying);
@@ -332,8 +326,20 @@ function onSongClicked(side) {
         const source = document.createElement("source");
         source.setAttribute("src", enc);
 
+        var curImg = new Image();
         var base = enc.substr(0, enc.lastIndexOf('/'));
-        document.body.style.backgroundImage = `url("${base}/?art")` + (prevImage ? `, url("${prevImage}/?art")` : '');
+        curImg.src = `${base}/?art`;
+        curImg.onload = function(){
+            var onElem = null;
+            if (state.audio.childElementCount === 1) {
+                onElem = state.audio.children[0].getAttribute('src');
+                onElem = onElem.substr(0, onElem.lastIndexOf('/'));
+            }
+            if (onElem == base) {
+                document.body.style.backgroundImage = `url("${base}/?art")`;
+            }
+        }
+
 
         if (state.realClick) {
             truncateNextHistory();
