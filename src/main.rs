@@ -12,7 +12,7 @@ use {
         App, HttpRequest, HttpResponse, HttpServer, Responder,
     },
     chrono::prelude::*,
-    derive_more::{Display, Error},
+    derive_more::Display,
     maud::{html, Markup, DOCTYPE},
     serde_derive::{Deserialize, Serialize},
     sha2::{Digest, Sha512},
@@ -152,21 +152,36 @@ async fn login_post(form: web::Form<LoginForm>, state: web::Data<State>) -> impl
         .finish()
 }
 
-#[derive(Debug, Display, Error)]
+#[derive(Debug, Display)]
 enum MyError {
     #[display(fmt = "unauthorized")]
     Unauthorized,
+    #[display(fmt = "no-artwork-found")]
+    NoArtworkFound,
+    #[display(fmt = "Redirecting to artwork")]
+    ArtWorkRedirect(String),
 }
+
+impl std::error::Error for MyError {}
 
 impl error::ResponseError for MyError {
     fn error_response(&self) -> HttpResponse {
-        HttpResponse::build(self.status_code())
-            .insert_header(ContentType::html())
-            .body(self.to_string())
+        let mut http = HttpResponse::build(self.status_code());
+
+        match self {
+            MyError::ArtWorkRedirect(link) => http.insert_header(("Location", &link[..])).finish(),
+            _ => http
+                .insert_header(ContentType::html())
+                .body(self.to_string()),
+        }
     }
 
     fn status_code(&self) -> StatusCode {
-        StatusCode::UNAUTHORIZED
+        match self {
+            MyError::Unauthorized => StatusCode::UNAUTHORIZED,
+            MyError::NoArtworkFound => StatusCode::NOT_FOUND,
+            MyError::ArtWorkRedirect(..) => StatusCode::PERMANENT_REDIRECT,
+        }
     }
 }
 
@@ -184,7 +199,28 @@ async fn get_file_restricted(
         .query("filename")
         .parse::<PathBuf>()
         .unwrap();
+
     path.push(&rest);
+
+    if req.query_string() == "art" {
+        for name in [
+            "art.png",
+            "cover.png",
+            "art.webp",
+            "cover.webp",
+            "art.jpg",
+            "cover.jpg",
+        ] {
+            path.push(name);
+            if path.exists() {
+                return Err(MyError::ArtWorkRedirect(name.to_string()).into());
+            }
+            path.pop();
+        }
+
+        return Err(MyError::NoArtworkFound.into());
+    }
+
     match NamedFile::open_async(path).await {
         Ok(file) => Ok(file),
         Err(err) => Err(err.into()),

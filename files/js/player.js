@@ -314,6 +314,12 @@ function onSongClicked(side) {
         if (state.currentlyPlaying !== undefined)
             state.currentlyPlaying.classList.remove("currently-playing");
 
+        var prevImage = null;
+        if (state.audio.childElementCount === 1) {
+            prevImage = state.audio.children[0].getAttribute('src');
+            prevImage = prevImage.substr(0, prevImage.lastIndexOf('/'));
+        }
+
         state.currentlyPlaying = event.target;
         var parent = state.currentlyPlaying.parentNode;
         state.playingIndex = Array.prototype.indexOf.call(parent.children, state.currentlyPlaying);
@@ -322,11 +328,12 @@ function onSongClicked(side) {
         event.target.classList.add("currently-playing");
 
         var src = decodeHtml("/files/music/" + event.target.innerHTML);
+        var enc = encodeURIComponent(src).replace(/%2F/g, "/");
         const source = document.createElement("source");
-        source.setAttribute("src", src);
+        source.setAttribute("src", enc);
 
-        var base = src.substr(0, src.lastIndexOf('/'));
-        document.body.style.backgroundImage = `url("${base}/art.png"), url("${base}/art.jpg"), url("${base}/art.webp"), url("${base}/cover.jpg"), url("${base}/cover.png")`;
+        var base = enc.substr(0, enc.lastIndexOf('/'));
+        document.body.style.backgroundImage = `url("${base}/?art")` + (prevImage ? `, url("${prevImage}/?art")` : '');
 
         if (state.realClick) {
             truncateNextHistory();
