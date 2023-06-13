@@ -111,9 +111,12 @@ function ensureRehomedHistory(direction) {
         }
 
         state.history.items.splice(state.history.index, 1);
-        if (state.history.index >= 0 && state.history.index < state.history.items.length)
+        if (direction < 0) {
+            state.history.index -= 1;
+        }
+        if (state.history.index >= 0 && state.history.index < state.history.items.length) {
             log("Attempting to use next item instead");
-        else {
+        } else {
             if (direction > 0) {
                 state.history.index = state.history.items.length - 1;
             } else if (direction < 0) {
