@@ -9,7 +9,7 @@ use {
         http::{header::ContentType, StatusCode},
         web,
         web::Data,
-        App, HttpRequest, HttpResponse, HttpServer, Responder,
+        App, FromRequest, HttpRequest, HttpResponse, HttpServer, Responder,
     },
     chrono::prelude::*,
     derive_more::Display,
@@ -187,6 +187,7 @@ impl error::ResponseError for MyError {
 
 async fn get_file_restricted(
     req: HttpRequest,
+    suffix: web::Path<PathBuf>,
     state: web::Data<State>,
 ) -> actix_web::Result<NamedFile> {
     if !is_logged_in(&req, &state) {
@@ -194,13 +195,7 @@ async fn get_file_restricted(
     }
 
     let mut path = PathBuf::from("files/music/");
-    let rest = req
-        .match_info()
-        .query("filename")
-        .parse::<PathBuf>()
-        .unwrap();
-
-    path.push(&rest);
+    path.push(&*suffix);
 
     if req.query_string() == "art" {
         for name in [
