@@ -235,12 +235,12 @@ async fn player(req: HttpRequest, state: web::Data<State>) -> impl Responder {
                 input id="filter" class="input" type="text" placeholder="Regex filter (smart case)" {}
                 div class="control-row" {
                     audio id="player" class="player" controls {
-                        source id="audioSource" src="" {}
                         "Your browser does not support the audio format."
                     }
-                    div id="next-button" class="centrist" { p class="next-button" { "Next" } }
-                    div id="shuffle-button" class="centrist" { p class="shuffle-button" title="Shuffle" { "Shuffle" } }
-                    div id="to-current" class="centrist" { p { "To Current" } }
+                    div id="prev-button" class="centrist" { p { "⏮️" } }
+                    div id="next-button" class="centrist" { p { "⏭️" } }
+                    div id="shuffle-button" class="centrist" { }
+                    div id="to-current" class="centrist" { p { "🎯" } }
                 }
                 div class="side-by-side" {
                     div id="included" class="included" {}
@@ -257,7 +257,11 @@ async fn player(req: HttpRequest, state: web::Data<State>) -> impl Responder {
 #[derive(Serialize)]
 struct List(Vec<PathBuf>);
 
-async fn list(state: web::Data<State>) -> impl Responder {
+async fn list(req: HttpRequest, state: web::Data<State>) -> impl Responder {
+    if !is_logged_in(&req, &state) {
+        return web::Json(List(vec!["Please log in first".into()]));
+    }
+
     let list = state.music.read().unwrap().clone();
     web::Json(List(list))
 }
@@ -276,7 +280,7 @@ async fn main() -> std::io::Result<()> {
             .route("/login", web::post().to(login_post))
             .route("/list", web::get().to(list))
             .route("/robots.txt", web::get().to(robots))
-            .route("favicon.ico", web::get().to(redirect_favicon))
+            .route("/favicon.ico", web::get().to(redirect_favicon))
             .route(
                 "/files/music/{filename:.*}",
                 web::get().to(get_file_restricted),

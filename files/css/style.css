@@ -3,23 +3,25 @@
 
 html { color-scheme: dark; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { display: flex; flex-direction: column; height: 100vh; position: absolute; width: 100vw; background-image: url("/files/images/sharding.jpg"); background-attachment: fixed; background-position: center top; background-repeat: y; background-size: 100% auto; }
+body { display: flex; flex-direction: column; height: 100vh; position: absolute; width: 100vw; background-image: url("/files/images/sharding.jpg"); background-attachment: fixed; background-position: center top; background-repeat: no-repeat; background-size: auto 100%; }
 
 .login-form { display: flex; flex-direction: column; flex-grow: 1; width: 100%; }
 .login-form > .button { flex-grow: 1; font-size: 4rem; width: 100%; }
 .login-form > .input { flex-grow: 1; color: var(--color-green); font-size: 4rem; text-align: center; width: 100%; }
 
-p { display: inline-block; font-family: "Arial"; padding: 1%; overflow-y: hidden; white-space: nowrap; }
+p { display: inline-block; font-family: "Arial"; padding: 2px; overflow-y: hidden; white-space: nowrap; }
 p:hover { background-color: var(--color-navy); }
 .centrist:hover { background-color: var(--color-navy); }
 
-body > .input { z-index: 1; display: block; flex: 1 1 10%; font-size: 3rem; }
-.control-row { align-items: center; border-bottom: 1px solid var(--color-orange); display: flex; flex-wrap: wrap; justify-content: center; overflow: hidden; }
+body > .input { z-index: 1; display: block; flex: 1 1 auto; font-size: 2rem; padding-left: 0.5rem; }
+.control-row { align-items: center; background-color: rgba(0, 0, 0, 0.8); border-bottom: 1px solid var(--color-orange); display: flex; flex-wrap: wrap; justify-content: center; overflow: hidden; }
 .control-row > .player { flex: 2 1 auto; }
 .control-row p { flex: 1 1 auto; text-align: center; user-select: none; }
-.side-by-side { display: flex; flex: 1 1 90%; overflow: hidden; }
-.included { border-right: 1px solid var(--color-orange); flex: 1 1 50%; padding: 1%; overflow: auto; }
-.side-by-side > * { background-color: rgba(0, 0, 0, 0.7); }
+.side-by-side { background-color: rgba(0, 0, 0, 0.8); display: flex; flex: 1 1 90%; overflow: hidden; }
+.included { border-right: 1px solid var(--color-orange); flex: 1 1 75%; padding: 2px; overflow: auto; }
+.excluded { flex: 1 1 25%; padding: 2px; overflow: auto; }
+.included > p { padding: 10px; }
+.excluded > p { padding: 10px; }
 .side-by-side p { float: left; clear: left; }
 .side-by-side p:hover { background-color: var(--color-navy); }
 .side-by-side p.currently-playing:nth-child(even) { color: var(--color-red); }
@@ -28,9 +30,8 @@ body > .input { z-index: 1; display: block; flex: 1 1 10%; font-size: 3rem; }
 .side-by-side p.currently-playing::after { content: " <"; }
 .side-by-side p:nth-child(even) { color: var(--color-silver); }
 .side-by-side p:nth-child(odd) { color: var(--color-gray); }
-.excluded { flex: 1 1 50%; padding: 1%; overflow: scroll; }
-.centrist { align-items: center; display: flex; flex: 1 1 auto; height: 100%; justify-content: center; }
-.centrist > * { flex: 1 1 auto; }
+.centrist { align-items: center; container-type: inline-size; display: flex; flex: 1 1 auto; height: 100%; justify-content: center; }
+.centrist > * { font-size: 2rem; flex: 1 1 auto; }
 
 @media (max-width:480px) {
     body > .input { display: block; flex: 1 1 10%; font-size: 2rem; }
@@ -38,20 +39,10 @@ body > .input { z-index: 1; display: block; flex: 1 1 10%; font-size: 3rem; }
     .control-row > .player { flex: 0 0 100%; }
     .centrist { align-items: center; height: 100%; justify-content: center; }
     .control-row > div { border: 1px solid gray; height: 100%;}
-    .control-row p { font-size: 1.5rem; height: 50%; }
+    .control-row p { font-size: 2rem; height: 50%; }
     .side-by-side { display: flex; flex: 1 1 70%; flex-direction: column; overflow: hidden; }
-    .included { border-bottom: 1px solid var(--color-orange); border-right: 0; }
+    .included { border-bottom: 1px solid var(--color-orange); border-right: 0; flex: 1 1 50%; overflow: auto; }
+    .excluded { flex: 1 1 50%; overflow: auto; }
+    .included > p { padding: 5px; }
+    .excluded > p { padding: 5px; }
 }
-
-.selected { color: var(--color-green); font-weight: bold; }
-
-.shuffle-button::before {
-  display: block;
-  content: attr(title);
-  font-weight: bold;
-  height: 0;
-  color: transparent;
-  overflow: hidden;
-  visibility: hidden;
-}
-
