@@ -88,8 +88,10 @@ function ensureRehomedHistory(direction) {
     while (true) {
         var item = state.history.items[state.history.index];
         log("Ensuring item is not orphaned:", item.innerHTML);
-        if (item.parentNode !== null) {
-            log("Item has parent, no rehoming necessary");
+        if (item.parentNode !== null &&
+            ((state.leftOrRightPlaying === "Left" && item.parentNode === state.includedList) ||
+                (state.leftOrRightPlaying === "Right" && item.parentNode === state.excludedList))) {
+            log("Item has parent in currently playing list, no rehoming necessary");
             return state.history.index;
         }
 
