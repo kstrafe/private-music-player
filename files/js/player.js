@@ -375,6 +375,7 @@ function onSongClicked(side) {
             const album = items[items.length - 2] || "Unknown";
             const artist = items[items.length - 3] || "Unknown";
             log("Playing new stream | Setting mediaSession variables title:", title, "| artist:", artist, "| album:", album);
+            window.navigator.mediaSession.playbackState = "playing";
             window.navigator.mediaSession.metadata.title = title;
             window.navigator.mediaSession.metadata.album = album;
             window.navigator.mediaSession.metadata.artist = artist;
