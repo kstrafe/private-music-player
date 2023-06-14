@@ -379,6 +379,7 @@ function onSongClicked(side) {
             window.navigator.mediaSession.metadata.title = title;
             window.navigator.mediaSession.metadata.album = album;
             window.navigator.mediaSession.metadata.artist = artist;
+            window.navigator.mediaSession.metadata.artwork = [ { src: `${base}/?art`, }, ];
         } else {
             log("Playing new stream");
         }
