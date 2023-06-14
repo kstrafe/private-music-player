@@ -521,6 +521,7 @@ if ("mediaSession" in navigator) {
       ['pause',         pauseAudio],
       ['previoustrack', onPreviousTrack],
       ['nexttrack',     onPlayNext],
+      ['seekto',        (d) => { state.audio.currentTime = d.seekTime; }]
     ];
 
     for (const [action, handler] of actionHandlers) {
