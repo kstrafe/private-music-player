@@ -9,7 +9,7 @@ use {
         http::{header::ContentType, StatusCode},
         web,
         web::Data,
-        App, FromRequest, HttpRequest, HttpResponse, HttpServer, Responder,
+        App, HttpRequest, HttpResponse, HttpServer, Responder,
     },
     chrono::prelude::*,
     derive_more::Display,
