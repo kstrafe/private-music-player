@@ -13,6 +13,7 @@ function getLS(name, otherwise) { if (typeof(Storage) !== "undefined") {
 }
 
 function strToBool(string) { if (string === "false") { return false; } else { return true; } }
+function demarc(wrapped) { return (...x) => { state.logger.log("demarc", "============================================================"); wrapped(...x); } }
 
 // Global state ============================================
 
@@ -297,9 +298,6 @@ function onSongClicked(side) {
     return function(event) {
         function log(...args) { state.logger.log("songcl", ...args); }
 
-        if (state.realClick)
-            log("Song got directly clicked");
-
         function decodeHtml(html) {
             var txt = document.createElement("textarea");
             txt.innerHTML = html;
@@ -310,6 +308,14 @@ function onSongClicked(side) {
             function log(...args) { state.logger.log("playin", ...args); }
             log(`${err.message}\nResource: ${src}`);
             state.audio.play().catch(playHandler);
+        }
+
+        if (state.realClick) {
+            demarc(() => {})();
+            log("Song got directly clicked");
+            truncateNextHistory();
+        } else {
+            state.realClick = true;
         }
 
         state.leftOrRightPlaying = side;
@@ -344,12 +350,6 @@ function onSongClicked(side) {
         }
 
 
-        if (state.realClick) {
-            truncateNextHistory();
-        } else {
-            state.realClick = true;
-        }
-
         if (state.history.index === state.history.items.length - 1) {
             state.history.items.push(event.target);
             state.history.index = state.history.items.length - 1;
@@ -359,14 +359,6 @@ function onSongClicked(side) {
 
         state.audio.load();
         state.audio.play().catch(playHandler);
-        // state.audio.play().catch((err) => {
-        //     function log(...args) { state.logger.log("playin", ...args); }
-        //     log(`${err.message}\nResource: ${src} ${state.audio.children[0].getAttribute('src')}`);
-        //     state.audio.load();
-        //     state.audio.play().catch((err) => {
-        //         log(`${err.message}\nResource: ${src} ${state.audio.children[0].getAttribute('src')}`);
-        //     });
-        // });
 
         navigator.mediaSession.playbackState = "playing";
         if ("mediaSession" in window.navigator) {
@@ -553,18 +545,18 @@ if ("mediaSession" in navigator) {
 
 // Event setup =============================================
 
-state.filter.oninput = onInput;
-state.audio.onended = onPlayNext;
+state.filter.oninput = demarc(onInput);
+state.audio.onended = demarc(onPlayNext);
 state.audio.onpause = () => state.isPlaying = false;
 state.audio.onplaying = () => state.isPlaying = true;
-state.audio.onvolumechange = storeVolume;
-state.nextButton.onclick = onPlayNext;
-state.prevButton.onclick = onPlayPrev;
-state.shuffleButton.onclick = onShuffleButtonClicked;
-state.toCurrent.onclick = focusOnCurrentlyPlaying;
+state.audio.onvolumechange = demarc(storeVolume);
+state.nextButton.onclick = demarc(onPlayNext);
+state.prevButton.onclick = demarc(onPlayPrev);
+state.shuffleButton.onclick = demarc(onShuffleButtonClicked);
+state.toCurrent.onclick = demarc(focusOnCurrentlyPlaying);
 
-setInterval(updateList, 300_000);
+setInterval(demarc(updateList), 300_000);
 
 // Initial update ==========================================
 
-updateList();
+demarc(updateList)();
