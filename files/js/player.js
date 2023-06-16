@@ -15,6 +15,8 @@ function getLS(name, otherwise) { if (typeof(Storage) !== "undefined") {
 function strToBool(string) { if (string === "false") { return false; } else { return true; } }
 function demarc(wrapped) { return (...x) => { state.logger.log("demarc", "============================================================"); wrapped(...x); } }
 
+const UPDATE_TIME = 300_000;
+
 // Global state ============================================
 
 const state = {
@@ -470,13 +472,16 @@ function updateList() {
 
     log("Sending update request to server");
     var xmlHttp = new XMLHttpRequest();
-    xmlHttp.onreadystatechange = function() {
-        log("Received response:", xmlHttp.status, 'readyState:', xmlHttp.readyState);
-        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-            log("Final response");
-            updateListInternal(JSON.parse(xmlHttp.responseText));
-        }
-    };
+
+    xmlHttp.onabort = () => { log("GET /list => aborted"); };
+    xmlHttp.onerror = (err) => { log("GET /list => errored:", err); };
+    xmlHttp.onload = (event) => { updateListInternal(JSON.parse(xmlHttp.responseText)); };
+    xmlHttp.onloadstart = (event) => { log("GET /list => started loading"); };
+    xmlHttp.onprogress = (event) => { log("GET /list => progressing:", event.loaded + "/" + event.total); };
+    xmlHttp.ontimeout = (event) => { log("GET /list => timed out",); };
+
+    xmlHttp.timeout = UPDATE_TIME / 2;
+
     const asynchronous = true;
     xmlHttp.open("GET", "/list", asynchronous);
     xmlHttp.send(null);
@@ -555,7 +560,7 @@ state.prevButton.onclick = demarc(onPlayPrev);
 state.shuffleButton.onclick = demarc(onShuffleButtonClicked);
 state.toCurrent.onclick = demarc(focusOnCurrentlyPlaying);
 
-setInterval(demarc(updateList), 300_000);
+setInterval(demarc(updateList), UPDATE_TIME);
 
 // Initial update ==========================================
 
