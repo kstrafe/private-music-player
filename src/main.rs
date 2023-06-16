@@ -31,7 +31,7 @@ static PORT: u16 = 8081;
 static DESCRIPTION: &str = "Private music player";
 static SINGULAR: &str = "Private music player";
 
-fn header() -> Markup {
+fn header(css: Markup) -> Markup {
     let december = Utc::now().month() == 12;
     html! {
         meta charset="UTF-8";
@@ -48,7 +48,7 @@ fn header() -> Markup {
             link rel="icon" type="image/png" href="/files/favicon/128.png";
         }
         link rel="stylesheet" type="text/css" href="/files/css/reset.css";
-        link rel="stylesheet" type="text/css" href="/files/css/style.css";
+        (css)
         meta name="description" content=(DESCRIPTION);
         meta property="og:title" content=(SINGULAR);
         meta property="og:description" content=(DESCRIPTION);
@@ -73,13 +73,12 @@ async fn login(query: web::Query<LoginQuery>) -> impl Responder {
         (DOCTYPE)
         html {
             head {
-                (header())
+                (header(html! { link rel="stylesheet" type="text/css" href="/files/css/login-style.css"; }))
                 title { "Login page" }
             }
             body {
                 form class="login-form" action="login" method="POST" {
                     input class="input" name="key" type="password" placeholder=(placeholder) value="";
-                    br;
                     input class="button" type="submit" value="Submit";
                 }
             }
@@ -259,7 +258,7 @@ async fn player(req: HttpRequest, state: web::Data<State>) -> impl Responder {
         (DOCTYPE)
         html {
             head {
-                (header())
+                (header(html! { link rel="stylesheet" type="text/css" href="/files/css/style.css"; }))
                 title { "Personal Music Player" }
             }
             body {

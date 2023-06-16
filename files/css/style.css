@@ -5,10 +5,6 @@ html { color-scheme: dark; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { display: flex; flex-direction: column; height: 100vh; position: absolute; width: 100vw; background-image: url("/files/images/sharding.jpg"); background-attachment: fixed; background-position: center top; background-repeat: no-repeat; background-size: auto 100%; }
 
-.login-form { display: flex; flex-direction: column; flex-grow: 1; width: 100%; }
-.login-form > .button { flex-grow: 1; font-size: 4rem; width: 100%; }
-.login-form > .input { flex-grow: 1; color: var(--color-green); font-size: 4rem; text-align: center; width: 100%; }
-
 p { display: inline-block; font-family: "Arial"; padding: 2px; overflow-y: hidden; white-space: nowrap; }
 p:hover { background-color: var(--color-navy); }
 .centrist:hover { background-color: var(--color-navy); }
@@ -18,8 +14,8 @@ body > .input { z-index: 1; display: block; flex: 1 1 auto; font-size: 2rem; pad
 .control-row > .player { flex: 2 1 auto; }
 .control-row p { flex: 1 1 auto; text-align: center; user-select: none; }
 .side-by-side { background-color: rgba(0, 0, 0, 0.8); display: flex; flex: 1 1 90%; overflow: hidden; }
-.included { border-right: 1px solid var(--color-orange); flex: 1 1 75%; padding: 2px; overflow: auto; }
-.excluded { flex: 1 1 25%; padding: 2px; overflow: auto; }
+.included { content-visibility: hidden; border-right: 1px solid var(--color-orange); flex: 1 1 75%; padding: 2px; overflow: auto; }
+.excluded { content-visibility: hidden; flex: 1 1 25%; padding: 2px; overflow: auto; }
 .included > p { padding: 10px; }
 .excluded > p { padding: 10px; }
 .side-by-side p { float: left; clear: left; }

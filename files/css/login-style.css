@@ -1,0 +1,17 @@
+@charset "utf-8";
+
+* { border: 0; box-sizing: border-box; margin: 0; padding: 0; }
+
+html { color-scheme: dark; }
+body { align-items: center; background-color: #0D0D0D; background-image: url("/files/images/sharding.jpg"); background-attachment: fixed; background-position: center center; background-repeat: no-repeat; background-size: 100% auto; display: flex; height: 100vh; justify-content: center; position: absolute; width: 100vw; }
+
+.login-form { opacity: 0.8; display: flex; flex: 0 0 50%; flex-direction: column; gap: 10%; height: 50%; }
+.login-form > .input { flex: 1 1 45%; font-size: 3rem; text-align: center; width: 100%; z-index: 1; }
+.login-form > .button { flex: 1 1 45%; font-size: 3rem; width: 100%; }
+
+@media (max-width:480px) {
+    body { align-items: flex-start; background-position: left top; background-size: auto auto; }
+    .login-form { display: flex; flex: 0 0 100%; flex-direction: column; gap: 10%; height: 50%; opacity: 0.8; }
+    .login-form > .input { flex: 0 1 45%; font-size: 2rem; text-align: center; width: 100%; }
+    .login-form > .button { flex: 0 1 45%; font-size: 2rem; width: 100%; }
+}
