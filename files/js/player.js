@@ -306,81 +306,101 @@ function onSongClicked(side) {
             return txt.value;
         }
 
-        function playHandler(err) {
-            function log(...args) { state.logger.log("playin", ...args); }
-            log(`${err.message}\nResource: ${src}`);
-            state.audio.play().catch(playHandler);
+        function playHandler(src) {
+            return (err) => {
+                function log(...args) { state.logger.log("playin", ...args); }
+                log(`${err.message}\nResource: ${src}`);
+                state.audio.play().catch(playHandler(src));
+            };
         }
 
         function removeExtension(string) {
             return string.replace(/\.\w+$/, "");
         }
 
-        if (state.realClick) {
-            demarc(() => {})();
-            log("Song got directly clicked");
-            truncateNextHistory();
-        } else {
-            state.realClick = true;
-        }
-
-        state.leftOrRightPlaying = side;
-
-        if (state.currentlyPlaying !== undefined)
-            state.currentlyPlaying.classList.remove("currently-playing");
-
-        state.currentlyPlaying = event.target;
-        var parent = state.currentlyPlaying.parentNode;
-        state.playingIndex = Array.prototype.indexOf.call(parent.children, state.currentlyPlaying);
-
-        state.audio.pause();
-        event.target.classList.add("currently-playing");
-
-        var src = decodeHtml("/files/music/" + event.target.innerHTML);
-        var enc = encodeURIComponent(src).replace(/%2F/g, "/");
-        const source = document.createElement("source");
-        source.setAttribute("src", enc);
-
-        var curImg = new Image();
-        var base = enc.substr(0, enc.lastIndexOf('/'));
-        curImg.src = `${base}/?art`;
-        curImg.onload = function(){
-            var onElem = null;
-            if (state.audio.childElementCount === 1) {
-                onElem = state.audio.children[0].getAttribute('src');
-                onElem = onElem.substr(0, onElem.lastIndexOf('/'));
-            }
-            if (onElem == base) {
-                document.body.style.backgroundImage = `url("${base}/?art")`;
+        function pushHistoryIfNotInsideHistory(target) {
+            if (state.history.index === state.history.items.length - 1) {
+                state.history.items.push(target);
+                state.history.index = state.history.items.length - 1;
             }
         }
 
+        function playSongFromEntry(target) {
+            state.audio.pause();
+            var songPath = decodeHtml("/files/music/" + target.innerHTML);
+            var enc = encodeURIComponent(songPath).replace(/%2F/g, "/");
+            const source = document.createElement("source");
+            source.setAttribute("src", enc);
 
-        if (state.history.index === state.history.items.length - 1) {
-            state.history.items.push(event.target);
-            state.history.index = state.history.items.length - 1;
+            state.audio.replaceChildren(source);
+            state.audio.load();
+            state.audio.play().catch(playHandler(songPath));
+
+            const pathToContainingDirectory = enc.substr(0, enc.lastIndexOf('/'));
+            return [songPath, pathToContainingDirectory];
         }
 
-        state.audio.replaceChildren(source);
-
-        state.audio.load();
-        state.audio.play().catch(playHandler);
-
-        navigator.mediaSession.playbackState = "playing";
-        if ("mediaSession" in window.navigator) {
-            const items = src.split("/");
-            const title = items[items.length - 1] || "Unknown";
-            const album = items[items.length - 2] || "Unknown";
-            const artist = items[items.length - 3] || "Unknown";
-            log("Playing new stream | Setting mediaSession variables title:", title, "| artist:", artist, "| album:", album);
-            window.navigator.mediaSession.playbackState = "playing";
-            window.navigator.mediaSession.metadata.title = removeExtension(title);
-            window.navigator.mediaSession.metadata.album = album;
-            window.navigator.mediaSession.metadata.artist = artist;
-            window.navigator.mediaSession.metadata.artwork = [ { src: `${base}/?art`, }, ];
-        } else {
-            log("Playing new stream");
+        function loadAssociatedArt(directoryOfSong) {
+            var curImg = new Image();
+            curImg.src = `${directoryOfSong}/?art`;
+            curImg.onload = function(){
+                var onElem = null;
+                if (state.audio.childElementCount === 1) {
+                    onElem = state.audio.children[0].getAttribute('src');
+                    onElem = onElem.substr(0, onElem.lastIndexOf('/'));
+                }
+                if (onElem == directoryOfSong) {
+                    document.body.style.backgroundImage = `url("${directoryOfSong}/?art")`;
+                }
+            }
         }
+
+        function truncateIfRealClick() {
+            if (state.realClick) {
+                demarc(() => {})();
+                log("Song got directly clicked");
+                truncateNextHistory();
+            } else {
+                state.realClick = true;
+            }
+        }
+
+        function markCurrentlyPlaying(target) {
+            state.leftOrRightPlaying = side;
+
+            if (state.currentlyPlaying !== undefined)
+                state.currentlyPlaying.classList.remove("currently-playing");
+
+            state.currentlyPlaying = target;
+            var parent = state.currentlyPlaying.parentNode;
+            state.playingIndex = Array.prototype.indexOf.call(parent.children, state.currentlyPlaying);
+            target.classList.add("currently-playing");
+
+        }
+
+        function setMediaSessionInfo(songPath, directoryOfSong) {
+            if ("mediaSession" in window.navigator) {
+                const items = songPath.split("/");
+                const title = removeExtension(items[items.length - 1] || "Unknown");
+                const album = items[items.length - 2] || "Unknown";
+                const artist = items[items.length - 3] || "Unknown";
+                log("Playing new stream | Setting mediaSession variables title:", title, "| artist:", artist, "| album:", album);
+                window.navigator.mediaSession.playbackState = "playing";
+                window.navigator.mediaSession.metadata.title = title;
+                window.navigator.mediaSession.metadata.album = album;
+                window.navigator.mediaSession.metadata.artist = artist;
+                window.navigator.mediaSession.metadata.artwork = [ { src: `${directoryOfSong}/?art`, }, ];
+            } else {
+                log("Playing new stream");
+            }
+        }
+
+        truncateIfRealClick();
+        markCurrentlyPlaying(event.target);
+        const [songPath, directoryOfSong] = playSongFromEntry(event.target);
+        loadAssociatedArt(directoryOfSong);
+        pushHistoryIfNotInsideHistory(event.target);
+        setMediaSessionInfo(songPath, directoryOfSong);
     };
 }
 
