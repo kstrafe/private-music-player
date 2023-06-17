@@ -312,6 +312,10 @@ function onSongClicked(side) {
             state.audio.play().catch(playHandler);
         }
 
+        function removeExtension(string) {
+            return string.replace(/\.\w+$/, "");
+        }
+
         if (state.realClick) {
             demarc(() => {})();
             log("Song got directly clicked");
@@ -370,7 +374,7 @@ function onSongClicked(side) {
             const artist = items[items.length - 3] || "Unknown";
             log("Playing new stream | Setting mediaSession variables title:", title, "| artist:", artist, "| album:", album);
             window.navigator.mediaSession.playbackState = "playing";
-            window.navigator.mediaSession.metadata.title = title;
+            window.navigator.mediaSession.metadata.title = removeExtension(title);
             window.navigator.mediaSession.metadata.album = album;
             window.navigator.mediaSession.metadata.artist = artist;
             window.navigator.mediaSession.metadata.artwork = [ { src: `${base}/?art`, }, ];
