@@ -14,8 +14,8 @@ body > .input { z-index: 1; display: block; flex: 1 1 auto; font-size: 2rem; pad
 .control-row > .player { flex: 2 1 auto; }
 .control-row p { flex: 1 1 auto; text-align: center; user-select: none; }
 .side-by-side { background-color: rgba(0, 0, 0, 0.8); display: flex; flex: 1 1 90%; overflow: hidden; }
-.included { content-visibility: hidden; border-right: 1px solid var(--color-orange); flex: 1 1 75%; padding: 2px; overflow: auto; }
-.excluded { content-visibility: hidden; flex: 1 1 25%; padding: 2px; overflow: auto; }
+.included { border-right: 1px solid var(--color-orange); flex: 1 1 75%; padding: 2px; overflow: auto; }
+.excluded { flex: 1 1 25%; padding: 2px; overflow: auto; }
 .included > p { padding: 10px; }
 .excluded > p { padding: 10px; }
 .side-by-side p { float: left; clear: left; }
