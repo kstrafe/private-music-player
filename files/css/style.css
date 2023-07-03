@@ -13,19 +13,16 @@ body > .input { z-index: 1; display: block; flex: 1 1 auto; font-size: 2rem; pad
 .control-row { align-items: center; background-color: rgba(0, 0, 0, 0.8); border-bottom: 1px solid var(--color-orange); display: flex; flex-wrap: wrap; justify-content: center; overflow: hidden; }
 .control-row > .player { flex: 2 1 auto; }
 .control-row p { flex: 1 1 auto; text-align: center; user-select: none; }
-.side-by-side { background-color: rgba(0, 0, 0, 0.8); display: flex; flex: 1 1 90%; overflow: hidden; }
-.included { border-right: 1px solid var(--color-orange); flex: 1 1 75%; padding: 2px; overflow: auto; }
-.excluded { flex: 1 1 25%; padding: 2px; overflow: auto; }
+.included { background-color: rgba(0, 0, 0, 0.8); border-right: 1px solid var(--color-orange); flex: 1 1 90%; padding: 2px; overflow: auto; }
 .included > p { padding: 10px; }
-.excluded > p { padding: 10px; }
-.side-by-side p { float: left; clear: left; }
-.side-by-side p:hover { background-color: var(--color-navy); }
-.side-by-side p.currently-playing:nth-child(even) { color: var(--color-red); }
-.side-by-side p.currently-playing:nth-child(odd) { color: var(--color-red); }
-.side-by-side p.currently-playing::before { content: "> "; }
-.side-by-side p.currently-playing::after { content: " <"; }
-.side-by-side p:nth-child(even) { color: var(--color-silver); }
-.side-by-side p:nth-child(odd) { color: var(--color-gray); }
+.included p { float: left; clear: left; }
+.included p:hover { background-color: var(--color-navy); }
+.included p.currently-playing:nth-child(even) { color: var(--color-red); }
+.included p.currently-playing:nth-child(odd) { color: var(--color-red); }
+.included p.currently-playing::before { content: "> "; }
+.included p.currently-playing::after { content: " <"; }
+.included p:nth-child(even) { color: var(--color-silver); }
+.included p:nth-child(odd) { color: var(--color-gray); }
 .centrist { align-items: center; container-type: inline-size; display: flex; flex: 1 1 auto; height: 100%; justify-content: center; }
 .centrist > * { font-size: 2rem; flex: 1 1 auto; }
 
@@ -36,9 +33,6 @@ body > .input { z-index: 1; display: block; flex: 1 1 auto; font-size: 2rem; pad
     .centrist { align-items: center; height: 100%; justify-content: center; }
     .control-row > div { border: 1px solid gray; height: 100%;}
     .control-row p { font-size: 2rem; height: 50%; }
-    .side-by-side { display: flex; flex: 1 1 70%; flex-direction: column; overflow: hidden; }
-    .included { border-bottom: 1px solid var(--color-orange); border-right: 0; flex: 1 1 50%; overflow: auto; }
-    .excluded { flex: 1 1 50%; overflow: auto; }
+    .included { border-bottom: 1px solid var(--color-orange); border-right: 0; flex: 1 1 70%; overflow: auto; }
     .included > p { padding: 5px; }
-    .excluded > p { padding: 5px; }
 }

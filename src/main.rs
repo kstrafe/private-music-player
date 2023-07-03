@@ -272,10 +272,7 @@ async fn player(req: HttpRequest, state: web::Data<State>) -> impl Responder {
                     div id="shuffle-button" class="centrist" { }
                     div id="to-current" class="centrist" { p { "🎯" } }
                 }
-                div class="side-by-side" {
-                    div id="included" class="included" {}
-                    div id="excluded" class="excluded" {}
-                }
+                div id="included" class="included" {}
                 script type="text/javascript" src="/files/js/player.js" {}
             }
         }

@@ -21,7 +21,6 @@ const UPDATE_TIME = 300_000;
 
 const state = {
     audio:         document.getElementById('player'),
-    excludedList:  document.getElementById('excluded'),
     filter:        document.getElementById('filter'),
     includedList:  document.getElementById('included'),
     nextButton:    document.getElementById('next-button'),
@@ -32,7 +31,6 @@ const state = {
     chunk: { handler: null, index: 0 },
     currentlyPlaying: undefined,
     isPlaying: true,
-    leftOrRightPlaying: "Left",
     list: [],
     playingIndex: -1,
     realClick: true,
@@ -71,12 +69,7 @@ function tryRehomeItem(item) {
         return item;
     }
 
-    var children;
-    if (state.leftOrRightPlaying === "Left") {
-        children = state.includedList.children;
-    } else {
-        children = state.excludedList.children;
-    }
+    var children = state.includedList.children;
 
     for (var idx in children) {
         if (children[idx].innerHTML == item.innerHTML) {
@@ -91,19 +84,12 @@ function ensureRehomedHistory(direction) {
     while (true) {
         var item = state.history.items[state.history.index];
         log("Ensuring item is not orphaned:", item.innerHTML);
-        if (item.parentNode !== null &&
-            ((state.leftOrRightPlaying === "Left" && item.parentNode === state.includedList) ||
-                (state.leftOrRightPlaying === "Right" && item.parentNode === state.excludedList))) {
+        if (item.parentNode !== null && item.parentNode === state.includedList) {
             log("Item has parent in currently playing list, no rehoming necessary");
             return state.history.index;
         }
 
-        var children;
-        if (state.leftOrRightPlaying === "Left") {
-            children = state.includedList.children;
-        } else {
-            children = state.excludedList.children;
-        }
+        var children = state.includedList.children;
 
         for (var idx in children) {
             if (children[idx].innerHTML == item.innerHTML) {
@@ -204,15 +190,8 @@ function onPlayNext() {
         return;
     }
 
-    if (state.leftOrRightPlaying == "Left") {
-        log("Play included/left/top list");
-        internalPlayNext(state.includedList);
-    } else if (state.leftOrRightPlaying == "Right") {
-        log("Play excluded/right/bottom list");
-        internalPlayNext(state.excludedList);
-    } else {
-        console.error("leftOrRightPlaying is neither Left nor Right:", state.leftOrRightPlaying);
-    }
+    log("Play included/left/top list");
+    internalPlayNext(state.includedList);
 }
 
 function truncateNextHistory() {
@@ -296,112 +275,108 @@ function onPreviousTrack() {
     state.audio.currentTime = 0;
 }
 
-function onSongClicked(side) {
-    return function(event) {
-        function log(...args) { state.logger.log("songcl", ...args); }
+function onSongClicked(event) {
+    function log(...args) { state.logger.log("songcl", ...args); }
 
-        function decodeHtml(html) {
-            var txt = document.createElement("textarea");
-            txt.innerHTML = html;
-            return txt.value;
+    function decodeHtml(html) {
+        var txt = document.createElement("textarea");
+        txt.innerHTML = html;
+        return txt.value;
+    }
+
+    function playHandler(src) {
+        return (err) => {
+            function log(...args) { state.logger.log("playin", ...args); }
+            log(`${err.message}\nResource: ${src}`);
+            state.audio.play().catch(playHandler(src));
+        };
+    }
+
+    function removeExtension(string) {
+        return string.replace(/\.\w+$/, "");
+    }
+
+    function pushHistoryIfNotInsideHistory(target) {
+        if (state.history.index === state.history.items.length - 1) {
+            state.history.items.push(target);
+            state.history.index = state.history.items.length - 1;
         }
+    }
 
-        function playHandler(src) {
-            return (err) => {
-                function log(...args) { state.logger.log("playin", ...args); }
-                log(`${err.message}\nResource: ${src}`);
-                state.audio.play().catch(playHandler(src));
-            };
-        }
+    function playSongFromEntry(target) {
+        state.audio.pause();
+        var songPath = decodeHtml("/files/music/" + target.innerHTML);
+        var enc = encodeURIComponent(songPath).replace(/%2F/g, "/");
+        const source = document.createElement("source");
+        source.setAttribute("src", enc);
 
-        function removeExtension(string) {
-            return string.replace(/\.\w+$/, "");
-        }
+        state.audio.replaceChildren(source);
+        state.audio.load();
+        state.audio.play().catch(playHandler(songPath));
 
-        function pushHistoryIfNotInsideHistory(target) {
-            if (state.history.index === state.history.items.length - 1) {
-                state.history.items.push(target);
-                state.history.index = state.history.items.length - 1;
+        const pathToContainingDirectory = enc.substr(0, enc.lastIndexOf('/'));
+        return [songPath, pathToContainingDirectory];
+    }
+
+    function loadAssociatedArt(directoryOfSong) {
+        var curImg = new Image();
+        curImg.src = `${directoryOfSong}/?art`;
+        curImg.onload = function(){
+            var onElem = null;
+            if (state.audio.childElementCount === 1) {
+                onElem = state.audio.children[0].getAttribute('src');
+                onElem = onElem.substr(0, onElem.lastIndexOf('/'));
+            }
+            if (onElem == directoryOfSong) {
+                document.body.style.backgroundImage = `url("${directoryOfSong}/?art")`;
             }
         }
+    }
 
-        function playSongFromEntry(target) {
-            state.audio.pause();
-            var songPath = decodeHtml("/files/music/" + target.innerHTML);
-            var enc = encodeURIComponent(songPath).replace(/%2F/g, "/");
-            const source = document.createElement("source");
-            source.setAttribute("src", enc);
-
-            state.audio.replaceChildren(source);
-            state.audio.load();
-            state.audio.play().catch(playHandler(songPath));
-
-            const pathToContainingDirectory = enc.substr(0, enc.lastIndexOf('/'));
-            return [songPath, pathToContainingDirectory];
+    function truncateIfRealClick() {
+        if (state.realClick) {
+            demarc(() => {})();
+            log("Song got directly clicked");
+            truncateNextHistory();
+        } else {
+            state.realClick = true;
         }
+    }
 
-        function loadAssociatedArt(directoryOfSong) {
-            var curImg = new Image();
-            curImg.src = `${directoryOfSong}/?art`;
-            curImg.onload = function(){
-                var onElem = null;
-                if (state.audio.childElementCount === 1) {
-                    onElem = state.audio.children[0].getAttribute('src');
-                    onElem = onElem.substr(0, onElem.lastIndexOf('/'));
-                }
-                if (onElem == directoryOfSong) {
-                    document.body.style.backgroundImage = `url("${directoryOfSong}/?art")`;
-                }
-            }
+    function markCurrentlyPlaying(target) {
+        if (state.currentlyPlaying !== undefined)
+            state.currentlyPlaying.classList.remove("currently-playing");
+
+        state.currentlyPlaying = target;
+        var parent = state.currentlyPlaying.parentNode;
+        state.playingIndex = Array.prototype.indexOf.call(parent.children, state.currentlyPlaying);
+        target.classList.add("currently-playing");
+
+    }
+
+    function setMediaSessionInfo(songPath, directoryOfSong) {
+        if ("mediaSession" in window.navigator) {
+            const items = songPath.split("/");
+            const title = removeExtension(items[items.length - 1] || "Unknown");
+            const album = items[items.length - 2] || "Unknown";
+            const artist = items[items.length - 3] || "Unknown";
+            log("Playing new stream | Setting mediaSession variables title:", title, "| artist:", artist, "| album:", album);
+            window.navigator.mediaSession.playbackState = "playing";
+            window.navigator.mediaSession.metadata.title = title;
+            window.navigator.mediaSession.metadata.album = album;
+            window.navigator.mediaSession.metadata.artist = artist;
+            window.navigator.mediaSession.metadata.artwork = [ { src: `${directoryOfSong}/?art`, }, ];
+        } else {
+            log("Playing new stream");
         }
+    }
 
-        function truncateIfRealClick() {
-            if (state.realClick) {
-                demarc(() => {})();
-                log("Song got directly clicked");
-                truncateNextHistory();
-            } else {
-                state.realClick = true;
-            }
-        }
-
-        function markCurrentlyPlaying(target) {
-            state.leftOrRightPlaying = side;
-
-            if (state.currentlyPlaying !== undefined)
-                state.currentlyPlaying.classList.remove("currently-playing");
-
-            state.currentlyPlaying = target;
-            var parent = state.currentlyPlaying.parentNode;
-            state.playingIndex = Array.prototype.indexOf.call(parent.children, state.currentlyPlaying);
-            target.classList.add("currently-playing");
-
-        }
-
-        function setMediaSessionInfo(songPath, directoryOfSong) {
-            if ("mediaSession" in window.navigator) {
-                const items = songPath.split("/");
-                const title = removeExtension(items[items.length - 1] || "Unknown");
-                const album = items[items.length - 2] || "Unknown";
-                const artist = items[items.length - 3] || "Unknown";
-                log("Playing new stream | Setting mediaSession variables title:", title, "| artist:", artist, "| album:", album);
-                window.navigator.mediaSession.playbackState = "playing";
-                window.navigator.mediaSession.metadata.title = title;
-                window.navigator.mediaSession.metadata.album = album;
-                window.navigator.mediaSession.metadata.artist = artist;
-                window.navigator.mediaSession.metadata.artwork = [ { src: `${directoryOfSong}/?art`, }, ];
-            } else {
-                log("Playing new stream");
-            }
-        }
-
-        truncateIfRealClick();
-        markCurrentlyPlaying(event.target);
-        const [songPath, directoryOfSong] = playSongFromEntry(event.target);
-        loadAssociatedArt(directoryOfSong);
-        pushHistoryIfNotInsideHistory(event.target);
-        setMediaSessionInfo(songPath, directoryOfSong);
-    };
+    truncateIfRealClick();
+    markCurrentlyPlaying(event.target);
+    const [songPath, directoryOfSong] = playSongFromEntry(event.target);
+    loadAssociatedArt(directoryOfSong);
+    pushHistoryIfNotInsideHistory(event.target);
+    setMediaSessionInfo(songPath, directoryOfSong);
 }
 
 function handleInput(target) {
@@ -415,11 +390,11 @@ function handleInput(target) {
                 const para = document.createElement("p");
                 const node = document.createTextNode(state.list[idx]);
                 para.appendChild(node);
-                para.addEventListener('click', onSongClicked("Left"));
+                para.addEventListener('click', onSongClicked);
 
                 included.appendChild(para);
 
-                if (state.currentlyPlaying !== undefined && state.leftOrRightPlaying === "Left") {
+                if (state.currentlyPlaying !== undefined) {
                     if (state.currentlyPlaying.innerHTML === para.innerHTML) {
                         state.currentlyPlaying = para;
                         state.currentlyPlaying.classList.add("currently-playing");
@@ -474,23 +449,6 @@ function updateList() {
         state.list = newList;
         var newNodes = [];
 
-        for (var idx in state.list) {
-            const para = document.createElement("p");
-            const node = document.createTextNode(state.list[idx]);
-            para.appendChild(node);
-            para.addEventListener('click', onSongClicked("Right"));
-            newNodes.push(para);
-
-            if (state.currentlyPlaying !== undefined && state.leftOrRightPlaying === "Right") {
-                if (state.currentlyPlaying.innerHTML === para.innerHTML) {
-                    state.currentlyPlaying = para;
-                    state.currentlyPlaying.classList.add("currently-playing");
-                    state.playingIndex = included.childElementCount - 1;
-                }
-            }
-        }
-
-        state.excludedList.replaceChildren(...newNodes);
         handleInput(state.filter);
     }
 
